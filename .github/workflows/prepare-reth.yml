@@ -45,8 +45,8 @@ jobs:
             CARGO_BIN=${{ inputs.binary_name }}
             MANIFEST_PATH=${{ inputs.cargo_package }}
             FEATURES=${{ inputs.cargo_features }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ inputs.binary_name }}-
+          cache-to: type=gha,mode=max,scope=${{ inputs.binary_name }}-
 
       - name: Upload reth image
         id: upload

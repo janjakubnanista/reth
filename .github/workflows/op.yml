@@ -1,0 +1,70 @@
+name: Run op-tests
+
+on:
+  push:
+
+env:
+  CARGO_TERM_COLOR: always
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  prepare-reth:
+    uses: ./.github/workflows/prepare-reth.yml
+    with:
+      image_tag: ghcr.io/paradigmxyz/op-reth:kurtosis-ci
+      binary_name: op-reth
+      cargo_features: asm-keccak
+      cargo_package: crates/optimism/bin/Cargo.toml
+
+  test:
+    name: Run op-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        # List of possible kurtosis system setups
+        args:
+          - ./systems/kurtosis/barebones_devnet.yaml
+          - ./systems/kurtosis/isthmus_devnet.yaml
+    needs:
+      - prepare-reth
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies
+        uses: jdx/mise-action@v2.1.11
+
+      - name: Download reth image
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts
+          path: /tmp
+
+      - name: Load reth image
+        run: docker load -i /tmp/reth_image.tar
+
+      - name: Start kurtosis
+        id: start-kurtosis
+        run: |
+          # First we start the kurtosis engine
+          just run-kurtosis ${{ matrix.args }} devnet github.com/ethpandaops/optimism-package
+          
+          # Then we export the kurtosis system URL as a job output
+          echo "system-url=ktnative://devnet$(realpath ${{ matrix.args }})" >> $GITHUB_OUTPUT
+        working-directory: testing/op-tests
+
+      - name: Show kurtosis system URL
+        run: echo "System URL ${{ steps.start-kurtosis.outputs.system-url }}"
+
+      - name: Run tests
+        run: just test
+        working-directory: testing/op-tests
+        env:
+          DEVNET_ENV_URL: ${{ steps.start-kurtosis.outputs.system-url }}

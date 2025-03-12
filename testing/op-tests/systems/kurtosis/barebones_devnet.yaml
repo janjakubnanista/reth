@@ -1,0 +1,12 @@
+optimism_package:
+  chains:
+    - participants:
+          - el_type: op-geth
+          - el_type: op-reth
+      network_params:
+        name: kurtosis
+        network_id: 1
+ethereum_package:
+  participants:
+    - el_type: geth
+      cl_type: teku

@@ -1,7 +1,8 @@
 name: Run op-tests
 
 on:
-  push:
+  - push
+  - workflow_dispatch
 
 env:
   CARGO_TERM_COLOR: always

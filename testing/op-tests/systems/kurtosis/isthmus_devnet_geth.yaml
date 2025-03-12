@@ -1,0 +1,13 @@
+optimism_package:
+  chains:
+    - participants:
+        - el_type: op-geth
+          el_image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest
+      network_params:
+        name: kurtosis
+        network_id: 1
+        isthmus_time_offset: 0
+ethereum_package:
+  participants:
+    - el_type: geth
+      cl_type: teku

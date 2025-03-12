@@ -30,7 +30,8 @@ jobs:
         # List of possible kurtosis system setups
         args:
           - ./systems/kurtosis/barebones_devnet.yaml
-          - ./systems/kurtosis/isthmus_devnet.yaml
+          - ./systems/kurtosis/isthmus_devnet_geth.yaml
+          - ./systems/kurtosis/isthmus_devnet_reth.yaml
     needs:
       - prepare-reth
     steps:
